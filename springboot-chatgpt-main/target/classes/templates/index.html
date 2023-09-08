@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<style>
+		#chat-container {
+			width: 400px;
+			height: 400px;
+			border: 1px solid #ccc;
+			padding: 10px;
+		}
+
+		#message-container {
+			height: 80%;
+			overflow-y: scroll;
+		}
+
+		#input-container {
+			display: flex;
+			align-items: center;
+			margin-top: 10px;
+		}
+
+		#user-input {
+			flex-grow: 1;
+			padding: 5px;
+		}
+
+		#send-button {
+			padding: 5px 10px;
+			background-color: #4CAF50;
+			color: white;
+			border: none;
+		}
+	</style>
+	<script>
+
+		// Function to send user message to the server
+		function sendMessage() {
+			const userMessage = document.getElementById('user-input').value.trim();
+
+			if (userMessage !== '') {
+				appendMessage(userMessage, 'user');
+
+				chatUrl = '/bot/chat?prompt='+userMessage;
+				fetch(chatUrl, {
+					method: 'GET',
+					headers: {
+						'Content-Type': 'application/json'
+					}
+				})
+					.then(response => response.text())
+					.then(data => {
+						appendMessage(data, 'bot');
+					})
+					.catch(error => {
+						console.error('Error:', error);
+						appendMessage('An error occurred. Please try again.', 'bot');
+					});
+
+				document.getElementById('user-input').value = '';
+			}
+		}
+
+		// Function to append a message to the message container
+		function appendMessage(message, sender) {
+			const messageElement = document.createElement('div');
+			messageElement.classList.add(sender);
+			messageElement.textContent = message;
+			document.getElementById('message-container').appendChild(messageElement);
+			document.getElementById('message-container').scrollTop = document.getElementById('message-container').scrollHeight;
+		}
+
+	</script>
+</head>
+
+<body>
+	<div id="chat-container">
+		<div id="message-container"></div>
+		<div id="input-container">
+			<input type="text" id="user-input" placeholder="Type your message..." />
+			<button id="send-button" onclick="sendMessage()">Send</button>
+		</div>
+	</div>
+
+</body>
+
+</html>
